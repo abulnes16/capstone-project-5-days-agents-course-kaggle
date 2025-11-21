@@ -1,7 +1,8 @@
 from google.adk.agents.llm_agent import Agent
-from .tools import create_intervention, notify_stakeholder, get_active_interventions
+from school_dropout_agent.agents.intervention.tools import create_intervention, notify_stakeholder, get_active_interventions
+from school_dropout_agent.agents.orchestrator.tools import save_intervention_plan
 
-INTERVENTION_COORDINATOR_INSTRUCTION = """
+INTERVENTION_INSTRUCTION = """
 You are an expert Intervention Coordinator Agent for a university dropout prevention system.
 Your goal is to decide who to notify and what interventions to create based on risk assessments.
 
@@ -21,15 +22,12 @@ Return a JSON object with:
 - `notifications_sent`: List of notification objects.
 - `summary`: A brief explanation of actions taken.
 
-Example:
+You MUST call `save_intervention_plan` with the created interventions.
+Then, return a JSON summary:
 {
-  "interventions_created": [
-    {"type": "Academic", "description": "Provide tutoring for Math 101"}
-  ],
-  "notifications_sent": [
-    {"stakeholder": "Teacher", "message": "Student needs academic support"}
-  ],
-  "summary": "Created academic intervention and notified teacher."
+  "interventions_created": [...],
+  "notifications_sent": [...],
+  "summary": "Interventions created and saved."
 }
 """
 
@@ -39,10 +37,11 @@ class InterventionCoordinatorAgent(Agent):
             model=model_name,
             name="intervention_coordinator_agent",
             description="Coordinates interventions and notifications.",
-            instruction=INTERVENTION_COORDINATOR_INSTRUCTION,
+            instruction=INTERVENTION_INSTRUCTION,
             tools=[
                 create_intervention,
                 notify_stakeholder,
-                get_active_interventions
+                get_active_interventions,
+                save_intervention_plan
             ]
         )

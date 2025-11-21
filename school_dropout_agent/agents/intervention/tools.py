@@ -1,14 +1,17 @@
 from typing import Dict, Any, List
+from school_dropout_agent.infrastructure.memory.database_memory import DatabaseMemoryService
+
+memory_service = DatabaseMemoryService()
 
 def create_intervention(student_id: str, intervention_type: str, description: str) -> Dict[str, Any]:
     """
-    Creates a new intervention record.
+    Creates a new intervention record and saves it to the database.
     """
     import uuid
     from datetime import datetime
     
     intervention_id = str(uuid.uuid4())
-    return {
+    intervention_data = {
         "intervention_id": intervention_id,
         "student_id": student_id,
         "type": intervention_type,
@@ -16,6 +19,11 @@ def create_intervention(student_id: str, intervention_type: str, description: st
         "description": description,
         "created_at": datetime.now().isoformat()
     }
+    
+    # Save to database
+    memory_service.store_intervention(student_id, intervention_data)
+    
+    return intervention_data
 
 def notify_stakeholder(stakeholder_type: str, student_id: str, message: str) -> Dict[str, Any]:
     """

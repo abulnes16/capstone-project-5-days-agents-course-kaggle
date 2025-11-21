@@ -32,6 +32,17 @@ async def test_orchestrator():
     print("\n1. Initializing database...")
     init_db()
     
+    # Seed student data
+    print("   Seeding student data...")
+    seed_memory = DatabaseMemoryService()
+    seed_memory.store_student_profile("risk_case_1", {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john.doe@example.com",
+        "enrollment_status": "Active",
+        "major": "Computer Science"
+    })
+    
     # Create services
     print("2. Creating memory and session services...")
     memory_service = DatabaseMemoryService()
@@ -72,10 +83,17 @@ async def test_orchestrator():
     print("-" * 60)
     
     async for event in runner.run_async(new_message=message, user_id="counselor_1", session_id="orch_session_1"):
+        # Print all attributes to debug
+        # print(f"DEBUG: Event type: {type(event)}")
+        
         if hasattr(event, 'content') and event.content and event.content.parts:
             for part in event.content.parts:
                 if part.text:
                     print(part.text, end="", flush=True)
+                elif part.function_call:
+                    print(f"\n[Tool Call: {part.function_call.name}]", flush=True)
+                elif part.function_response:
+                    print(f"\n[Tool Result: {part.function_response.name}]", flush=True)
     
     print("\n" + "-" * 60)
     

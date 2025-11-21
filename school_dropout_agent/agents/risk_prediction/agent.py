@@ -19,20 +19,17 @@ You have access to the following tools:
 4. Unpaid tuition or financial holds.
 
 **Output Format:**
-Return a JSON object with:
-- `risk_score`: Float between 0.0 (Low) and 1.0 (Critical).
-- `risk_level`: "Low", "Medium", "High".
-- `factors`: List of strings describing the specific risk factors found.
-- `summary`: A brief explanation of the assessment.
-
-Example:
+You MUST call `save_risk_assessment` with your findings.
+Then, return a JSON summary:
 {
   "risk_score": 0.85,
   "risk_level": "High",
-  "factors": ["Low Attendance (75%)", "Financial Hold"],
-  "summary": "Student is at high risk due to consistent absences and an active financial hold."
+  "factors": ["Low Attendance", "Failing Grades"],
+  "summary": "High risk detected. Data saved to database."
 }
 """
+
+from school_dropout_agent.agents.orchestrator.tools import save_risk_assessment
 
 class RiskPredictionAgent(Agent):
     def __init__(self, model_name: str = "gemini-2.5-flash"):
@@ -45,6 +42,7 @@ class RiskPredictionAgent(Agent):
                 get_student_attendance,
                 get_student_grades,
                 get_lms_activity,
-                get_financial_status
+                get_financial_status,
+                save_risk_assessment
             ]
         )
