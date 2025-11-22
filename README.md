@@ -1,23 +1,38 @@
 # School Dropout Prevention Multi-Agent System
 
-## The School Dropout Scenario
+## 1. The School Dropout Scenario (Problem Statement)
 School dropout remains a critical issue in education systems worldwide, leading to reduced economic opportunities for individuals and significant societal costs. The primary challenge lies in **early detection**. Often, the signs of a student struggling—whether academic, emotional, or financial—appear in siloed systems (LMS, SIS, counseling logs) long before the student actually drops out. Human counselors are often overwhelmed by caseloads and cannot manually synthesize this disparate data for every student in real-time. By the time a student is flagged, it is often too late for effective intervention.
 
-## How Agents Can Help
+## 2. How Agents Can Help (Solution)
 A Multi-Agent System (MAS) offers a powerful solution to this problem by mimicking a team of specialized experts working together 24/7.
 *   **Holistic Analysis**: Unlike simple rule-based alerts, agents can synthesize unstructured data (counseling notes, survey sentiment) with structured data (grades, attendance).
 *   **Specialization**: Different agents can adopt specific personas (e.g., a "Psychologist" agent vs. a "Financial Aid" agent), allowing for deep, nuanced analysis of specific risk factors.
 *   **Scalability**: Agents can monitor thousands of students simultaneously, flagging only those who need human attention.
 *   **Coordination**: An orchestrator agent can manage the workflow, ensuring that finding a risk leads to concrete actions (interventions, notifications) without human administrative overhead.
 
-## The School Dropout Multi-Agent System
+## 3. The School Dropout Multi-Agent System (Architecture)
 This project implements a sophisticated multi-agent system using the **Google Agent Development Kit (ADK)**. It follows **Clean Architecture** principles to ensure modularity and testability.
 
-### Architecture Overview
-*   **Framework**: Google ADK (Agent Development Kit)
-*   **Model**: Gemini 2.5 Flash (optimized for speed and reasoning)
-*   **Memory**: PostgreSQL (production) / SQLite (local) via SQLAlchemy
-*   **Session Management**: Shared `InMemorySessionService` for efficient context sharing.
+### Architecture Diagram
+```mermaid
+graph TD
+    User[User / System Trigger] -->|Student ID| Orch[Orchestrator Agent]
+    Orch -->|1. Analyze Risk| Risk[Risk Prediction Agent]
+    Risk -->|Save Assessment| DB[(Database)]
+    Risk -->|Risk Score| Orch
+    
+    Orch -->|2. Check Emotional State| Emo[Emotional & Behavioral Agent]
+    Emo -->|Sentiment Analysis| Orch
+    
+    Orch -->|If High Risk| Plan[Planning Phase]
+    
+    Plan -->|3. Create Study Plan| Acad[Academic Support Agent]
+    Plan -->|4. Create Interventions| Interv[Intervention Coordinator]
+    Interv -->|Save Interventions| DB
+    Plan -->|5. Notify Parents| Family[Family Engagement Agent]
+    
+    Orch -->|6. Summarize| Final[Final Report]
+```
 
 ### Agent Roles & Functionality
 The system is composed of an **Orchestrator** and six specialized **Sub-Agents**.
@@ -58,7 +73,52 @@ To simulate a real-world environment, this project mocks connections to external
 *   **LMS (Learning Management System)**: Mocked login activity and assignment completion.
 *   **Financial System**: Mocked tuition status and holds.
 
-## Results and Testing
+## 4. Setup & Installation
+
+### Prerequisites
+*   Python 3.10 or higher
+*   A Google Cloud Project with Vertex AI API enabled OR a Google AI Studio API Key.
+
+### Installation
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd school_dropout_agent
+    ```
+
+2.  **Create a virtual environment**:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    ```
+
+3.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Set up Environment Variables**:
+    Export your Google API Key:
+    ```bash
+    export GOOGLE_API_KEY="your-api-key-here"
+    # OR for Vertex AI
+    export VERTEX_AI_PROJECT_ID="your-project-id"
+    export VERTEX_AI_LOCATION="us-central1"
+    ```
+
+### Running the System
+To verify the full end-to-end workflow, run the verification script:
+```bash
+python verify_orchestrator.py
+```
+This script will:
+1.  Initialize a local SQLite database.
+2.  Seed a mock student profile ("risk_case_1").
+3.  Run the Orchestrator to analyze the student.
+4.  Verify that risk assessments and interventions are saved to the database.
+5.  Perform a follow-up query to test memory retrieval.
+
+## 5. Results and Testing
 The system has been verified using the `verify_orchestrator.py` script, which simulates a full end-to-end workflow.
 
 ### Behavior Observed
