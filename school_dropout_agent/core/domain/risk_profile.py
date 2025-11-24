@@ -1,3 +1,8 @@
+"""
+This module defines the RiskProfile entity.
+It encapsulates the result of a risk assessment, including the calculated score, level, and specific factors.
+Used by the RiskPredictionAgent to return analysis results and by the Orchestrator to make decisions.
+"""
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List

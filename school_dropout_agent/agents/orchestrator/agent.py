@@ -1,3 +1,8 @@
+"""
+This module defines the DropoutPreventionOrchestrator agent.
+It is the main entry point for the system, coordinating all sub-agents to analyze students and create interventions.
+It uses the Wrapper Pattern to ensure reliable execution of sub-agents.
+"""
 from google.adk.agents.llm_agent import Agent
 from school_dropout_agent.agents.orchestrator.wrappers import (
     analyze_risk, check_emotional_state, coordinate_intervention,

@@ -1,3 +1,8 @@
+"""
+This module defines the InterventionCoordinatorAgent.
+It is responsible for creating formal intervention records and notifying stakeholders.
+It saves intervention plans to the database.
+"""
 from google.adk.agents.llm_agent import Agent
 from school_dropout_agent.agents.intervention.tools import create_intervention, notify_stakeholder, get_active_interventions
 from school_dropout_agent.agents.orchestrator.tools import save_intervention_plan

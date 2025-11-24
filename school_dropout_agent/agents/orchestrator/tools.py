@@ -1,3 +1,8 @@
+"""
+This module defines tools specifically for the Orchestrator.
+Currently includes `get_student_context` to retrieve past history.
+Note: Persistence tools (`save_risk_assessment`, etc.) are imported here but used by sub-agents.
+"""
 from typing import Dict, Any, List
 from school_dropout_agent.infrastructure.memory.database_memory import DatabaseMemoryService
 

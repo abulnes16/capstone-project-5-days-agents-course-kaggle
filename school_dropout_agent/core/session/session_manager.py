@@ -1,3 +1,8 @@
+"""
+This module defines the SessionManager.
+It wraps the ADK SessionService to integrate it with our custom MemoryService.
+Responsible for loading student history into the session context and persisting updates back to the database.
+"""
 from typing import Dict, Any, Optional
 from google.adk.sessions import BaseSessionService
 from school_dropout_agent.infrastructure.memory.database_memory import DatabaseMemoryService

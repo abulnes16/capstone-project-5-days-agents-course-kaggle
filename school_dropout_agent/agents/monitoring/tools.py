@@ -1,4 +1,8 @@
-from typing import Dict, Any
+"""
+This module defines tools for the Monitoring Agent.
+It provides functionality to check intervention status and recent academic progress.
+"""
+from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
 def get_intervention_outcome(intervention_id: str) -> Dict[str, Any]:

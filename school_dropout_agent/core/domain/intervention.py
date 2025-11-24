@@ -1,3 +1,8 @@
+"""
+This module defines the Intervention entity.
+It represents a specific action taken to support a student, such as tutoring or counseling.
+Used by the InterventionCoordinatorAgent to create and track support actions.
+"""
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum

@@ -11,6 +11,11 @@ load_dotenv(env_path)
 
 APP_NAME = "dropout_prevention"
 
+"""
+This script verifies the end-to-end workflow of the School Dropout Prevention System.
+It initializes the database, seeds mock data, runs the Orchestrator to analyze a student,
+and verifies that risk assessments and interventions are correctly persisted to the database.
+"""
 import asyncio
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService

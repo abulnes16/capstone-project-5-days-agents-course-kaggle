@@ -1,4 +1,9 @@
-from typing import Dict, Any, List, Optional
+"""
+This module implements the DatabaseMemoryService.
+It provides the concrete logic for storing and retrieving data using SQLAlchemy.
+Acts as the bridge between the application core and the database.
+"""
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 import json
 from school_dropout_agent.core.memory.memory_service import MemoryService

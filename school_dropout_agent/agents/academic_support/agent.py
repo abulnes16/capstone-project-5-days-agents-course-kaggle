@@ -1,3 +1,7 @@
+"""
+This module defines the AcademicSupportAgent.
+It creates personalized study plans based on the student's academic performance and learning style.
+"""
 from google.adk.agents.llm_agent import Agent
 from .tools import get_weak_subjects, get_learning_style, get_study_resources
 

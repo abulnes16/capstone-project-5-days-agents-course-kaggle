@@ -1,3 +1,7 @@
+"""
+This module defines tools for the Risk Prediction Agent.
+It mocks connections to SIS, LMS, and Financial systems to retrieve student data.
+"""
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
 

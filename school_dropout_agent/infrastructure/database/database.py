@@ -1,3 +1,8 @@
+"""
+This module handles database connection and session management.
+It provides the `get_db` context manager and initializes the database engine.
+Defaults to SQLite for local development but supports PostgreSQL.
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import Base

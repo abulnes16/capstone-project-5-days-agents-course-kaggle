@@ -1,3 +1,8 @@
+"""
+This module defines the Student entity.
+It represents the core domain object for a student, containing personal details and academic status.
+Used throughout the system to identify and track students being analyzed.
+"""
 from dataclasses import dataclass, field
 from typing import List, Optional
 from datetime import date

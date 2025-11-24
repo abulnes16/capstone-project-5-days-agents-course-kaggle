@@ -1,3 +1,8 @@
+"""
+This module defines the RiskPredictionAgent.
+It analyzes student data (attendance, grades, LMS, financial) to calculate a dropout risk score.
+It is responsible for saving the risk assessment to the database.
+"""
 from google.adk.agents.llm_agent import Agent
 from .tools import get_student_attendance, get_student_grades, get_lms_activity, get_financial_status
 

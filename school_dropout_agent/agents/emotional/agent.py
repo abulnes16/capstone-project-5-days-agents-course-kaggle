@@ -1,3 +1,7 @@
+"""
+This module defines the EmotionalBehavioralAgent.
+It analyzes qualitative data (counseling notes, surveys) to assess the student's emotional well-being.
+"""
 from google.adk.agents.llm_agent import Agent
 from .tools import get_counseling_visits, get_survey_responses, get_social_engagement
 

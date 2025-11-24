@@ -1,3 +1,8 @@
+"""
+This module defines the MonitoringAgent.
+It tracks the progress of interventions and student performance over time.
+Used for follow-up queries and long-term tracking.
+"""
 from google.adk.agents.llm_agent import Agent
 from .tools import get_intervention_outcome, compare_metrics, record_outcome
 

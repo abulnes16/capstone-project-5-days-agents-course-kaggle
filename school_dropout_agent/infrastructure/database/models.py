@@ -1,3 +1,8 @@
+"""
+This module defines the SQLAlchemy database models.
+It maps the domain entities (Student, RiskProfile, Intervention) to database tables.
+Used by the DatabaseMemoryService for persistence.
+"""
 from sqlalchemy import Column, String, Float, DateTime, Integer, ForeignKey, JSON, Enum as SQLEnum
 from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime

@@ -1,3 +1,7 @@
+"""
+This module defines tools for the Emotional & Behavioral Agent.
+It mocks retrieval of counseling logs and student survey responses.
+"""
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
 

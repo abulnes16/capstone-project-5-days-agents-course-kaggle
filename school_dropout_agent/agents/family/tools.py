@@ -1,3 +1,7 @@
+"""
+This module defines tools for the Family Engagement Agent.
+It provides functionality to retrieve parent contact info and send messages.
+"""
 from typing import Dict, Any
 
 def get_parent_contact_info(student_id: str) -> Dict[str, Any]:

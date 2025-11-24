@@ -1,3 +1,7 @@
+"""
+This module defines tools for the Intervention Coordinator Agent.
+It includes `create_intervention` (which saves to DB) and `notify_stakeholder`.
+"""
 from typing import Dict, Any, List
 from school_dropout_agent.infrastructure.memory.database_memory import DatabaseMemoryService
 

@@ -1,3 +1,8 @@
+"""
+This module defines wrapper functions for running sub-agents.
+Each wrapper creates a dedicated `Runner` and `Session` (shared) for a sub-agent.
+This ensures that sub-agents execute in their own context and can reliably call their own tools (including persistence).
+"""
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.agents.llm_agent import Agent

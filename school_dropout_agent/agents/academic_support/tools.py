@@ -1,3 +1,7 @@
+"""
+This module defines tools for the Academic Support Agent.
+It provides functionality to create study plans and retrieve learning resources.
+"""
 from typing import Dict, Any, List
 
 def get_weak_subjects(student_id: str) -> Dict[str, Any]:

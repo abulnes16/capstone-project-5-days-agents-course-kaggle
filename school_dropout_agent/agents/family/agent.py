@@ -1,3 +1,7 @@
+"""
+This module defines the FamilyEngagementAgent.
+It drafts communication to parents/guardians to involve them in the student's support plan.
+"""
 from google.adk.agents.llm_agent import Agent
 from .tools import get_parent_contact_info, send_parent_message, translate_message
 

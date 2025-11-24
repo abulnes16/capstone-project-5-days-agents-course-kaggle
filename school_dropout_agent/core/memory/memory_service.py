@@ -1,3 +1,8 @@
+"""
+This module defines the MemoryService interface.
+It specifies the contract for storing and retrieving student data, risk profiles, and interventions.
+Implemented by concrete memory services (e.g., DatabaseMemoryService).
+"""
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from datetime import datetime
