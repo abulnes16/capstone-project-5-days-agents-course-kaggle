@@ -26,9 +26,11 @@ async def _run_sub_agent(agent: Agent, app_name: str, prompt: str) -> str:
     
     # Create session if not exists (idempotent)
     try:
+        # Create or get shared session
         await session_service.create_session(app_name=app_name, user_id="system", session_id="shared_session")
-    except ValueError:
-        pass # Session might already exist
+    except Exception:
+        # Session likely already exists, which is fine
+        pass
         
     runner = Runner(agent=agent, session_service=session_service, app_name=app_name)
     

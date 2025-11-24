@@ -4,18 +4,19 @@ It provides functionality to create study plans and retrieve learning resources.
 """
 from typing import Dict, Any, List
 
+from school_dropout_agent.infrastructure.mock_data import MockDataStore
+
 def get_weak_subjects(student_id: str) -> Dict[str, Any]:
     """
     Identifies subjects where the student is struggling.
     """
-    if student_id == "risk_case_1":
+    data = MockDataStore.get_student_data(student_id, "academic_support")
+    if data:
         return {
             "student_id": student_id,
-            "weak_subjects": [
-                {"subject": "Math 101", "grade": "D", "topic": "Calculus"},
-                {"subject": "History 202", "grade": "C-", "topic": "World War II"}
-            ]
+            "weak_subjects": data.get("weak_subjects", [])
         }
+
     return {
         "student_id": student_id,
         "weak_subjects": []
@@ -25,7 +26,14 @@ def get_learning_style(student_id: str) -> Dict[str, Any]:
     """
     Retrieves the student's preferred learning style.
     """
-    # Mock data - in production, this would come from a student profile
+    data = MockDataStore.get_student_data(student_id, "academic_support")
+    if data:
+        return {
+            "student_id": student_id,
+            "learning_style": data.get("learning_style", "Visual"),
+            "preferences": data.get("preferences", [])
+        }
+
     return {
         "student_id": student_id,
         "learning_style": "Visual",

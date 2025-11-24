@@ -5,7 +5,7 @@ It saves intervention plans to the database.
 """
 from google.adk.agents.llm_agent import Agent
 from school_dropout_agent.agents.intervention.tools import create_intervention, notify_stakeholder, get_active_interventions
-from school_dropout_agent.agents.orchestrator.tools import save_intervention_plan
+from school_dropout_agent.agents.intervention.tools import create_intervention, notify_stakeholder, get_active_interventions
 
 INTERVENTION_INSTRUCTION = """
 You are an expert Intervention Coordinator Agent for a university dropout prevention system.
@@ -27,7 +27,6 @@ Return a JSON object with:
 - `notifications_sent`: List of notification objects.
 - `summary`: A brief explanation of actions taken.
 
-You MUST call `save_intervention_plan` with the created interventions.
 Then, return a JSON summary:
 {
   "interventions_created": [...],
@@ -46,7 +45,6 @@ class InterventionCoordinatorAgent(Agent):
             tools=[
                 create_intervention,
                 notify_stakeholder,
-                get_active_interventions,
-                save_intervention_plan
+                get_active_interventions
             ]
         )

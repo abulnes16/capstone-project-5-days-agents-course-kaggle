@@ -35,17 +35,26 @@ async def test_orchestrator():
     
     # Initialize database
     print("\n1. Initializing database...")
+    if os.path.exists("school_dropout_agent.db"):
+        os.remove("school_dropout_agent.db")
     init_db()
     
     # Seed student data
     print("   Seeding student data...")
     seed_memory = DatabaseMemoryService()
-    seed_memory.store_student_profile("risk_case_1", {
+    seed_memory.store_student_profile("student_high_risk", {
         "first_name": "John",
         "last_name": "Doe",
         "email": "john.doe@example.com",
         "enrollment_status": "Active",
         "major": "Computer Science"
+    })
+    seed_memory.store_student_profile("student_low_risk", {
+        "first_name": "Alice",
+        "last_name": "Johnson",
+        "email": "alice.j@example.com",
+        "enrollment_status": "Active",
+        "major": "Biology"
     })
     
     # Create services
@@ -58,19 +67,22 @@ async def test_orchestrator():
     print("3. Creating orchestrator agent...")
     orchestrator = DropoutPreventionOrchestrator()
     
-    # Create session for student analysis
-    student_id = "risk_case_1"
-    print(f"4. Creating session for student: {student_id}...")
-    
-    session = await session_manager.create_student_session(
-        app_name=APP_NAME,
-        user_id="counselor_1",
-        student_id=student_id,
-        session_id="orch_session_1"
+    # Create Sessions
+    print("4. Creating sessions...")
+    await session_manager.create_student_session(
+        app_name=APP_NAME, 
+        user_id="counselor_1", 
+        student_id="student_high_risk",
+        session_id="orch_session_high"
+    )
+    await session_manager.create_student_session(
+        app_name=APP_NAME, 
+        user_id="counselor_1", 
+        student_id="student_low_risk",
+        session_id="orch_session_low"
     )
     
-    print(f"   Session created: {session.id}")
-    print(f"   Initial state: {session.state}")
+    print(f"   Sessions created: orch_session_high, orch_session_low")
     
     # Create runner
     runner = Runner(agent=orchestrator, session_service=session_service, app_name=APP_NAME)
@@ -80,70 +92,51 @@ async def test_orchestrator():
     print("TEST 1: Complete Student Analysis")
     print("="*60)
     
-    prompt = f"Please analyze student {student_id} for dropout risk and create appropriate interventions."
+    prompt = "Please analyze student student_high_risk for dropout risk and create appropriate interventions."
     message = Content(role="user", parts=[Part(text=prompt)])
     
     print(f"\nPrompt: {prompt}\n")
     print("Orchestrator Response:")
-    print("-" * 60)
     
-    async for event in runner.run_async(new_message=message, user_id="counselor_1", session_id="orch_session_1"):
-        # Print all attributes to debug
-        # print(f"DEBUG: Event type: {type(event)}")
-        
-        if hasattr(event, 'content') and event.content and event.content.parts:
-            for part in event.content.parts:
-                if part.text:
-                    print(part.text, end="", flush=True)
-                elif part.function_call:
-                    print(f"\n[Tool Call: {part.function_call.name}]", flush=True)
-                elif part.function_response:
-                    print(f"\n[Tool Result: {part.function_response.name}]", flush=True)
+    message = Content(role="user", parts=[Part(text=prompt)])
     
-    print("\n" + "-" * 60)
-    
-    # Check session state
-    print("\n5. Checking session state...")
-    final_state = await session_manager.get_session_state(
-        app_name=APP_NAME,
-        user_id="counselor_1",
-        session_id="orch_session_1"
-    )
-    print(f"   Final session state: {final_state}")
-    
-    # Check memory persistence
-    print("\n6. Checking memory persistence...")
-    student_history = memory_service.retrieve_student_history(student_id)
-    if student_history:
-        print(f"   Student history retrieved from database:")
-        print(f"   - Risk Level: {student_history.get('risk_profile', {}).get('risk_level', 'N/A')}")
-        print(f"   - Interventions: {len(student_history.get('interventions', []))}")
-    else:
-        print("   No student history found in database")
-    
-    # Test 2: Follow-up query (session resumption)
-    print("\n" + "="*60)
-    print("TEST 2: Follow-up Query (Session Resumption)")
-    print("="*60)
-    
-    followup_prompt = f"What interventions were created for student {student_id}?"
-    followup_message = Content(role="user", parts=[Part(text=followup_prompt)])
-    
-    print(f"\nPrompt: {followup_prompt}\n")
     print("Orchestrator Response:")
     print("-" * 60)
-    
-    async for event in runner.run_async(new_message=followup_message, user_id="counselor_1", session_id="orch_session_1"):
+    async for event in runner.run_async(new_message=message, user_id="counselor_1", session_id="orch_session_high"):
         if hasattr(event, 'content') and event.content and event.content.parts:
             for part in event.content.parts:
                 if part.text:
                     print(part.text, end="", flush=True)
-    
     print("\n" + "-" * 60)
     
+    # Verify Persistence
+    print("\nChecking memory persistence for student_high_risk...")
+    history = memory_service.retrieve_student_history("student_high_risk")
+    if history:
+        print("   Student history retrieved from database:")
+        if history.get("risk_profile"):
+            print(f"   - Risk Level: {history['risk_profile'].get('risk_level')}")
+        print(f"   - Interventions: {len(history.get('interventions', []))}")
+    else:
+        print("   [ERROR] No student history found in database!")
+
     print("\n" + "="*60)
-    print("Verification Complete!")
+    print("TEST 2: Low Risk Student Analysis (student_low_risk)")
     print("="*60)
+    
+    prompt_low = "Please analyze student student_low_risk for dropout risk."
+    print(f"\nPrompt: {prompt_low}\n")
+    
+    message_low = Content(role="user", parts=[Part(text=prompt_low)])
+    
+    print("Orchestrator Response:")
+    print("-" * 60)
+    async for event in runner.run_async(new_message=message_low, user_id="counselor_1", session_id="orch_session_low"):
+        if hasattr(event, 'content') and event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    print(part.text, end="", flush=True)
+    print("\n" + "-" * 60)
 
 if __name__ == "__main__":
     asyncio.run(test_orchestrator())

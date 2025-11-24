@@ -4,10 +4,17 @@ It provides functionality to retrieve parent contact info and send messages.
 """
 from typing import Dict, Any
 
+from school_dropout_agent.infrastructure.mock_data import MockDataStore
+
 def get_parent_contact_info(student_id: str) -> Dict[str, Any]:
     """
     Retrieves parent/guardian contact information.
     """
+    data = MockDataStore.get_student_data(student_id, "family")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     # Mock data
     return {
         "student_id": student_id,

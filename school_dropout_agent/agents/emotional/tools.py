@@ -5,18 +5,17 @@ It mocks retrieval of counseling logs and student survey responses.
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
+from school_dropout_agent.infrastructure.mock_data import MockDataStore
+
 def get_counseling_visits(student_id: str) -> Dict[str, Any]:
     """
     Fetches counseling visit records for a student.
     """
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "total_visits": 5,
-            "recent_visits": 3,  # Last 30 days
-            "last_visit_date": (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d"),
-            "reported_issues": ["stress", "burnout", "anxiety"]
-        }
+    data = MockDataStore.get_student_data(student_id, "counseling")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     return {
         "student_id": student_id,
         "total_visits": 0,
@@ -29,14 +28,11 @@ def get_survey_responses(student_id: str) -> Dict[str, Any]:
     """
     Fetches recent survey responses from the student.
     """
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "satisfaction_score": 2.5,  # Out of 5
-            "stress_level": 4.5,  # Out of 5
-            "workload_rating": 5.0,  # Out of 5 (overwhelming)
-            "comments": "Feeling overwhelmed with coursework and personal issues."
-        }
+    data = MockDataStore.get_student_data(student_id, "surveys")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     return {
         "student_id": student_id,
         "satisfaction_score": 4.0,
@@ -49,16 +45,14 @@ def get_social_engagement(student_id: str) -> Dict[str, Any]:
     """
     Fetches social and campus engagement data.
     """
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "club_memberships": 0,
-            "event_attendance_last_month": 0,
-            "peer_interaction_score": 1.5  # Out of 5
-        }
+    data = MockDataStore.get_student_data(student_id, "social")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     return {
         "student_id": student_id,
-        "club_memberships": 2,
-        "event_attendance_last_month": 4,
-        "peer_interaction_score": 4.0
+        "club_memberships": 1,
+        "event_attendance_last_month": 2,
+        "peer_interaction_score": 3.0
     }

@@ -5,26 +5,24 @@ It mocks connections to SIS, LMS, and Financial systems to retrieve student data
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
+from school_dropout_agent.infrastructure.mock_data import MockDataStore
+
 # Mock data for demonstration
 def get_student_attendance(student_id: str) -> Dict[str, Any]:
     """
     Fetches attendance records for a student.
     """
-    # Mock logic: return low attendance for specific ID to test risk
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "total_classes": 40,
-            "missed_classes": 10,
-            "attendance_rate": 0.75,
-            "recent_absences": 3, # Last 2 weeks
-            "last_attended": (datetime.now() - timedelta(days=5)).strftime("%Y-%m-%d")
-        }
+    data = MockDataStore.get_student_data(student_id, "attendance")
+    if data:
+        data["student_id"] = student_id
+        return data
+    
+    # Fallback for unknown IDs
     return {
         "student_id": student_id,
         "total_classes": 40,
-        "missed_classes": 2,
-        "attendance_rate": 0.95,
+        "missed_classes": 0,
+        "attendance_rate": 1.0,
         "recent_absences": 0,
         "last_attended": datetime.now().strftime("%Y-%m-%d")
     }
@@ -33,57 +31,44 @@ def get_student_grades(student_id: str) -> Dict[str, Any]:
     """
     Fetches current grades and assignment status.
     """
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "current_gpa": 2.1,
-            "failed_courses": 1,
-            "missing_assignments": 4,
-            "recent_grades": [
-                {"course": "Math 101", "grade": "D"},
-                {"course": "History 202", "grade": "C-"}
-            ]
-        }
+    data = MockDataStore.get_student_data(student_id, "grades")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     return {
         "student_id": student_id,
-        "current_gpa": 3.5,
+        "current_gpa": 3.0,
         "failed_courses": 0,
         "missing_assignments": 0,
-        "recent_grades": [
-            {"course": "Math 101", "grade": "A"},
-            {"course": "History 202", "grade": "B+"}
-        ]
+        "recent_grades": []
     }
 
 def get_lms_activity(student_id: str) -> Dict[str, Any]:
     """
     Fetches Learning Management System (LMS) activity logs.
     """
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "last_login": (datetime.now() - timedelta(days=14)).strftime("%Y-%m-%d"),
-            "average_daily_time_minutes": 5,
-            "resources_viewed_last_week": 0
-        }
+    data = MockDataStore.get_student_data(student_id, "lms")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     return {
         "student_id": student_id,
         "last_login": datetime.now().strftime("%Y-%m-%d"),
-        "average_daily_time_minutes": 45,
-        "resources_viewed_last_week": 12
+        "average_daily_time_minutes": 30,
+        "resources_viewed_last_week": 5
     }
 
 def get_financial_status(student_id: str) -> Dict[str, Any]:
     """
     Checks for financial holds or unpaid tuition.
     """
-    if student_id == "risk_case_1":
-        return {
-            "student_id": student_id,
-            "tuition_paid": False,
-            "financial_hold": True,
-            "outstanding_balance": 1500.00
-        }
+    data = MockDataStore.get_student_data(student_id, "financial")
+    if data:
+        data["student_id"] = student_id
+        return data
+
     return {
         "student_id": student_id,
         "tuition_paid": True,
