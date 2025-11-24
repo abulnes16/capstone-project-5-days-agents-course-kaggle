@@ -3,6 +3,7 @@ This module defines the AcademicSupportAgent.
 It creates personalized study plans based on the student's academic performance and learning style.
 """
 from google.adk.agents.llm_agent import Agent
+from google.adk.tools import google_search
 from .tools import get_weak_subjects, get_learning_style, get_study_resources
 
 ACADEMIC_SUPPORT_INSTRUCTION = """
@@ -13,18 +14,20 @@ You have access to the following tools:
 - `get_weak_subjects`: Identify subjects where the student is struggling.
 - `get_learning_style`: Get the student's preferred learning style.
 - `get_study_resources`: Fetch relevant study resources for specific topics.
+- `google_search`: Search the web for relevant study resources.
 
 **Your Task:**
 1. Identify the student's weak subjects.
 2. Understand their learning style preferences.
 3. Recommend tailored study resources for each weak subject.
+4. Use `google_search` to find additional resources if needed.
 
 **Output Format:**
 Return a JSON object with:
 - `study_plan`: List of objects, each containing:
   - `subject`: Subject name.
   - `topic`: Specific topic to focus on.
-  - `recommended_resources`: List of resource objects (type, title, url).
+  - `recommended_resources`: List of resource objects (type, title, url). Use `google_search` to find additional resources if needed.
 - `learning_style`: The student's preferred learning style.
 - `summary`: A brief explanation of the study plan.
 
@@ -54,6 +57,7 @@ class AcademicSupportAgent(Agent):
             tools=[
                 get_weak_subjects,
                 get_learning_style,
-                get_study_resources
+                get_study_resources,
+                google_search
             ]
         )
