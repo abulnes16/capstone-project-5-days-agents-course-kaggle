@@ -22,21 +22,15 @@ You have access to the following tools:
 3. **Low Risk**: No immediate action, but log for monitoring.
 
 **Output Format:**
-Return a JSON object with:
-- `interventions_created`: List of intervention objects.
-- `notifications_sent`: List of notification objects.
-- `summary`: A brief explanation of actions taken.
-
-Then, return a JSON summary:
-{
-  "interventions_created": [...],
-  "notifications_sent": [...],
-  "summary": "Interventions created and saved."
-}
+1. Call `save_agent_result` with the full interventions JSON.
+2. Return a BRIEF 1-sentence summary (e.g., "Created 2 interventions and notified counselor.").
 """
 
+
+from school_dropout_agent.agents.orchestrator.tools import save_agent_result
+
 class InterventionCoordinatorAgent(Agent):
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, memory_service=None, model_name: str = "gemini-2.5-flash"):
         super().__init__(
             model=model_name,
             name="intervention_coordinator_agent",
@@ -45,6 +39,8 @@ class InterventionCoordinatorAgent(Agent):
             tools=[
                 create_intervention,
                 notify_stakeholder,
-                get_active_interventions
+                get_active_interventions,
+                save_agent_result
             ]
         )
+        object.__setattr__(self, 'memory_service', memory_service)

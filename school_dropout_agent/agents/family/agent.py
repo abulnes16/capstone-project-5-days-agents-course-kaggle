@@ -21,21 +21,14 @@ You have access to the following tools:
 4. Provide actionable information (e.g., "Your child may benefit from tutoring").
 
 **Output Format:**
-Return a JSON object with:
-- `message_sent`: The message content.
-- `language`: The language used.
-- `summary`: A brief explanation of the communication.
-
-Example:
-{
-  "message_sent": "We noticed your child is struggling with Math. We recommend tutoring.",
-  "language": "English",
-  "summary": "Sent supportive message to parent about academic support."
-}
+1. Call `save_agent_result` with the full message details JSON.
+2. Return a BRIEF 1-sentence summary (e.g., "Sent supportive message to parents in English.").
 """
 
+from school_dropout_agent.agents.orchestrator.tools import save_agent_result
+
 class FamilyEngagementAgent(Agent):
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, memory_service=None, model_name: str = "gemini-2.5-flash"):
         super().__init__(
             model=model_name,
             name="family_engagement_agent",
@@ -44,6 +37,8 @@ class FamilyEngagementAgent(Agent):
             tools=[
                 get_parent_contact_info,
                 send_parent_message,
-                translate_message
+                translate_message,
+                save_agent_result
             ]
         )
+        object.__setattr__(self, 'memory_service', memory_service)

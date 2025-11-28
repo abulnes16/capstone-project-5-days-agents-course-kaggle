@@ -3,8 +3,9 @@ This module defines tools specifically for the Orchestrator.
 Currently includes `get_student_context` to retrieve past history.
 Note: Persistence tools (`save_risk_assessment`, etc.) are imported here but used by sub-agents.
 """
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from school_dropout_agent.infrastructure.memory.database_memory import DatabaseMemoryService
+from school_dropout_agent.core.session.shared_state import SharedStateStore
 
 # Initialize memory service
 memory_service = DatabaseMemoryService()
@@ -46,3 +47,38 @@ def get_student_context(student_id: str) -> Dict[str, Any]:
     if not history:
         return {"status": "not_found", "message": f"No history found for {student_id}"}
     return history
+
+
+
+def save_agent_result(agent_name: str, result: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Saves the detailed result of an agent to the shared session state.
+    Use this to pass full JSON data to the orchestrator without cluttering the conversation.
+    """
+    SharedStateStore.save_result(agent_name, result)
+    return {"status": "success", "message": f"Result saved for {agent_name}"}
+
+def get_all_agent_results(student_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Retrieves agent results. Prioritizes SharedStateStore (current session).
+    If empty and student_id is provided, falls back to DatabaseMemoryService.
+    """
+    # 1. Try Shared State (Current Session)
+    results = SharedStateStore.get_all_results()
+    if results:
+        return results
+        
+    # 2. Fallback to Database (Past History)
+    if student_id:
+        history = memory_service.retrieve_student_history(student_id)
+        if history:
+            return {
+                "source": "database",
+                "risk_prediction_agent": history.get("risk_profile", {}),
+                "intervention_coordinator_agent": {"interventions": history.get("interventions", [])},
+                # Note: Other qualitative data might not be in the structured history yet
+                # but this gives us the core info.
+                "full_history": history
+            }
+            
+    return {"message": "No results found in shared state or database."}

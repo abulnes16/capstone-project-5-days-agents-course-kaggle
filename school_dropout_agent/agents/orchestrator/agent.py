@@ -1,56 +1,48 @@
 """
 This module defines the DropoutPreventionOrchestrator agent.
-It is the main entry point for the system, coordinating all sub-agents to analyze students and create interventions.
-It uses the Wrapper Pattern to ensure reliable execution of sub-agents.
+It acts as a Router, deciding whether to run a full analysis pipeline or answer specific questions based on existing data.
 """
 from google.adk.agents.llm_agent import Agent
-from school_dropout_agent.agents.orchestrator.wrappers import (
-    analyze_risk, check_emotional_state, coordinate_intervention,
-    provide_academic_support, engage_family, monitor_progress
-)
-from school_dropout_agent.agents.orchestrator.tools import get_student_context
+from school_dropout_agent.agents.orchestrator.pipeline import FullAnalysisPipeline
+from school_dropout_agent.agents.summary.agent import FinalSummaryAgent
 
-ORCHESTRATOR_INSTRUCTION = """
-You are the Dropout Prevention Orchestrator. You coordinate specialized agents to help students.
+ROUTER_INSTRUCTION = """
+You are the Dropout Prevention Orchestrator. You are the main interface for the system.
 
-**Your Tools:**
-- `analyze_risk`: Runs the Risk Prediction Agent. **ALWAYS START HERE.**
-- `check_emotional_state`: Runs the Emotional Agent.
-- `coordinate_intervention`: Runs the Intervention Coordinator.
-- `provide_academic_support`: Runs the Academic Support Agent.
-- `engage_family`: Runs the Family Engagement Agent.
-- `monitor_progress`: Runs the Monitoring Agent.
-- `get_student_context`: Retrieves past history.
+**Your Capabilities:**
+1. **Run Full Analysis**: If the user asks to analyze a student, assess risk, or create interventions, delegate to `full_analysis_pipeline`.
+2. **Provide Summary**: If the user asks about the results of the last assessment, or wants a summary of what happened, delegate to `final_summary_agent`.
 
-**Workflow:**
-1. Call `analyze_risk(student_id=...)`.
-2. Call `check_emotional_state(student_id=...)`.
-3. If risk is High/Medium (based on analysis results):
-   - Call `provide_academic_support(...)`.
-   - Call `coordinate_intervention(...)`.
-   - Call `engage_family(...)`.
-4. Summarize the actions taken.
+**Routing Logic:**
+- "Analyze student X" -> `full_analysis_pipeline`
+- "Check risk for student Y" -> `full_analysis_pipeline`
+- "What was the result?" -> `final_summary_agent`
+- "Show me the summary" -> `final_summary_agent`
 
-**Note:** The sub-agents will handle saving data to the database automatically. You just need to coordinate them.
+**Important:**
+- Do NOT run the full pipeline if the user is just asking about previous results.
+- Delegate to the appropriate sub-agent based on the user's intent.
 """
 
 class DropoutPreventionOrchestrator(Agent):
-    """Main orchestrator agent that coordinates all specialized agents."""
+    """
+    Router agent that directs user requests to the appropriate sub-agent or pipeline.
+    """
     
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, memory_service=None, model_name: str = "gemini-2.5-flash"):
+        # Initialize sub-agents
+        sub_agents = [
+            FullAnalysisPipeline(memory_service=memory_service, model_name=model_name),
+            FinalSummaryAgent(memory_service=memory_service, model_name=model_name)
+        ]
+        
         super().__init__(
             model=model_name,
             name="dropout_prevention_orchestrator",
-            description="Coordinates specialized agents to prevent student dropout.",
-            instruction=ORCHESTRATOR_INSTRUCTION,
-            tools=[
-                analyze_risk,
-                check_emotional_state,
-                coordinate_intervention,
-                provide_academic_support,
-                engage_family,
-                monitor_progress,
-                get_student_context
-            ]
-            # Note: No sub_agents list needed as we use wrapper tools
+            description="Main router that coordinates student analysis and reporting.",
+            instruction=ROUTER_INSTRUCTION,
+            sub_agents=sub_agents
         )
+        
+        # Store memory service after super().__init__()
+        object.__setattr__(self, 'memory_service', memory_service)

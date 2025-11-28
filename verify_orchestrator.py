@@ -65,7 +65,7 @@ async def test_orchestrator():
     
     # Create orchestrator
     print("3. Creating orchestrator agent...")
-    orchestrator = DropoutPreventionOrchestrator()
+    orchestrator = DropoutPreventionOrchestrator(memory_service=memory_service)
     
     # Create Sessions
     print("4. Creating sessions...")
@@ -132,6 +132,50 @@ async def test_orchestrator():
     print("Orchestrator Response:")
     print("-" * 60)
     async for event in runner.run_async(new_message=message_low, user_id="counselor_1", session_id="orch_session_low"):
+        if hasattr(event, 'content') and event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    print(part.text, end="", flush=True)
+    print("\n" + "-" * 60)
+
+    print("\n" + "="*60)
+    print("TEST 3: Summary Request (student_high_risk)")
+    print("="*60)
+    
+    prompt_summary = "What was the result of the analysis for student_high_risk?"
+    print(f"\nPrompt: {prompt_summary}\n")
+    
+    message_summary = Content(role="user", parts=[Part(text=prompt_summary)])
+    
+    print("Orchestrator Response:")
+    print("-" * 60)
+    async for event in runner.run_async(new_message=message_summary, user_id="counselor_1", session_id="orch_session_high"):
+        if hasattr(event, 'content') and event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    print(part.text, end="", flush=True)
+    print("\n" + "-" * 60)
+
+    print("\n" + "-" * 60)
+
+    # Test 4: Summary Request with Empty Shared State (Database Fallback)
+    print("\n" + "="*60)
+    print("TEST 4: Summary Request with Empty Shared State (Database Fallback)")
+    print("="*60)
+    
+    # Clear Shared State to force DB fallback
+    from school_dropout_agent.core.session.shared_state import SharedStateStore
+    SharedStateStore.clear()
+    print("   [Shared State Cleared]")
+    
+    prompt_fallback = "Can you give me a summary for student_high_risk again? I lost the previous one."
+    print(f"\nPrompt: {prompt_fallback}\n")
+    
+    message_fallback = Content(role="user", parts=[Part(text=prompt_fallback)])
+    
+    print("Orchestrator Response:")
+    print("-" * 60)
+    async for event in runner.run_async(new_message=message_fallback, user_id="counselor_1", session_id="orch_session_high"):
         if hasattr(event, 'content') and event.content and event.content.parts:
             for part in event.content.parts:
                 if part.text:

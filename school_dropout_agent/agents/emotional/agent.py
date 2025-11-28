@@ -22,23 +22,15 @@ You have access to the following tools:
 5. Negative sentiment in survey comments.
 
 **Output Format:**
-Return a JSON object with:
-- `behavioral_flag`: Boolean indicating if concerning patterns were detected.
-- `severity`: "Low", "Medium", "High".
-- `indicators`: List of strings describing specific behavioral concerns.
-- `summary`: A brief explanation of the assessment.
-
-Example:
-{
-  "behavioral_flag": true,
-  "severity": "High",
-  "indicators": ["High Stress (4.5/5)", "Increased Counseling Visits (3 recent)", "No Social Engagement"],
-  "summary": "Student shows signs of severe stress and social isolation, with frequent counseling visits."
-}
+1. Call `save_agent_result` with the full JSON analysis.
+2. Return a BRIEF 1-sentence summary (e.g., "Detected high stress and low satisfaction.").
 """
 
+
+from school_dropout_agent.agents.orchestrator.tools import save_agent_result
+
 class EmotionalBehavioralAgent(Agent):
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, memory_service=None, model_name: str = "gemini-2.5-flash"):
         super().__init__(
             model=model_name,
             name="emotional_behavioral_agent",
@@ -47,6 +39,8 @@ class EmotionalBehavioralAgent(Agent):
             tools=[
                 get_counseling_visits,
                 get_survey_responses,
-                get_social_engagement
+                get_social_engagement,
+                save_agent_result
             ]
         )
+        object.__setattr__(self, 'memory_service', memory_service)

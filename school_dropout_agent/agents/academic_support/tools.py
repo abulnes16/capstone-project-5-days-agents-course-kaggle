@@ -2,7 +2,11 @@
 This module defines tools for the Academic Support Agent.
 It provides functionality to create study plans and retrieve learning resources.
 """
-from typing import Dict, Any, List
+import os
+from mcp.client.stdio import StdioServerParameters
+from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
+from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
+from typing import Dict, Any
 
 from school_dropout_agent.infrastructure.mock_data import MockDataStore
 
@@ -54,3 +58,31 @@ def get_study_resources(subject: str, topic: str) -> Dict[str, Any]:
             {"type": "Tutorial", "title": f"{topic} Step-by-Step", "url": "https://example.com/tutorial"}
         ]
     }
+
+def get_video_resources(subject: str, topic: str) -> Dict[str, Any]:
+    """
+    Fetches relevant video resources for a given subject and topic. Using Youtube MCP Server
+    The MCP Server has a search_videos tool that returns a list of videos for a given query.
+
+    Input:
+    - subject: The subject of the video
+    - topic: The topic of the video
+
+    Output:
+    - videos: List of videos
+    """
+    return McpToolset(
+        connection_params= StdioConnectionParams(
+            server_params= StdioServerParameters(
+                command="npx",
+                args=["-y", "zubeid-youtube-mcp-server"],
+                tool_filter=["search_videos"],
+                env={
+                    "YOUTUBE_API_KEY": os.getenv("YOUTUBE_API_KEY")
+                },
+                input= {
+                    "query": f"{subject} {topic}"
+                }
+            )
+        )
+    )

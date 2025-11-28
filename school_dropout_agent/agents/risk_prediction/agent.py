@@ -24,20 +24,15 @@ You have access to the following tools:
 4. Unpaid tuition or financial holds.
 
 **Output Format:**
-You MUST call `save_risk_assessment` with your findings.
-Then, return a JSON summary:
-{
-  "risk_score": 0.85,
-  "risk_level": "High",
-  "factors": ["Low Attendance", "Failing Grades"],
-  "summary": "High risk detected. Data saved to database."
-}
+1. Call `save_risk_assessment` to save to database.
+2. Call `save_agent_result` with the full JSON analysis (risk_score, level, factors, etc.).
+3. Return a BRIEF 1-sentence summary (e.g., "Identified High Risk (0.85) due to attendance and grades.").
 """
 
-from school_dropout_agent.agents.orchestrator.tools import save_risk_assessment
+from school_dropout_agent.agents.orchestrator.tools import save_risk_assessment, save_agent_result
 
 class RiskPredictionAgent(Agent):
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, memory_service=None, model_name: str = "gemini-2.5-flash"):
         super().__init__(
             model=model_name,
             name="risk_prediction_agent",
@@ -48,6 +43,8 @@ class RiskPredictionAgent(Agent):
                 get_student_grades,
                 get_lms_activity,
                 get_financial_status,
-                save_risk_assessment
+                save_risk_assessment,
+                save_agent_result
             ]
         )
+        object.__setattr__(self, 'memory_service', memory_service)

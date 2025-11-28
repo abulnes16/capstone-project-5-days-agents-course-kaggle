@@ -21,25 +21,14 @@ You have access to the following tools:
 3. Recommend continuation, adjustment, or closure of the intervention.
 
 **Output Format:**
-Return a JSON object with:
-- `intervention_effective`: Boolean indicating if the intervention worked.
-- `metrics_comparison`: Object showing before/after metrics.
-- `recommendation`: "Continue", "Adjust", or "Close".
-- `summary`: A brief explanation of the assessment.
-
-Example:
-{
-  "intervention_effective": true,
-  "metrics_comparison": {
-    "attendance": {"before": 0.75, "after": 0.85, "improved": true}
-  },
-  "recommendation": "Continue",
-  "summary": "Intervention was effective. Attendance improved by 10%."
-}
+1. Call `save_agent_result` with the full monitoring report JSON.
+2. Return a BRIEF 1-sentence summary (e.g., "Intervention effective, attendance improved by 10%.").
 """
 
+from school_dropout_agent.agents.orchestrator.tools import save_agent_result
+
 class MonitoringAgent(Agent):
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, memory_service=None, model_name: str = "gemini-2.5-flash"):
         super().__init__(
             model=model_name,
             name="monitoring_agent",
@@ -48,6 +37,8 @@ class MonitoringAgent(Agent):
             tools=[
                 get_intervention_outcome,
                 compare_metrics,
-                record_outcome
+                record_outcome,
+                save_agent_result
             ]
         )
+        object.__setattr__(self, 'memory_service', memory_service)
