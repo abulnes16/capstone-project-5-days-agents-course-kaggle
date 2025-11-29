@@ -48,35 +48,62 @@ The system is composed of a **Router Agent**, a **Sequential Pipeline**, and spe
 1.  **Dropout Prevention Orchestrator (Router)** (`orchestrator/agent.py`):
     *   **Role**: The intelligent router.
     *   **Functionality**: Decides whether to trigger a full analysis or provide a summary of past results.
+    *   **Tools**: None (Routes to sub-agents).
 
 2.  **Full Analysis Pipeline** (`orchestrator/pipeline.py`):
     *   **Role**: The workflow manager.
     *   **Functionality**: Executes the 6-step analysis process sequentially, ensuring data flows between agents via the Shared State.
+    *   **Tools**: None (Manages sequential execution).
 
 3.  **Risk Prediction Agent** (`risk_prediction/agent.py`):
     *   **Role**: The data analyst.
     *   **Functionality**: Calculates risk scores based on grades, attendance, and financial data. Persists results to the database.
+    *   **Tools**:
+        *   `get_student_attendance`: Check attendance patterns.
+        *   `get_student_grades`: Check academic performance.
+        *   `get_lms_activity`: Check LMS engagement.
+        *   `get_financial_status`: Check for financial holds.
+        *   `save_risk_assessment`: Save risk profile to DB.
 
 4.  **Emotional & Behavioral Agent** (`emotional/agent.py`):
     *   **Role**: The school psychologist.
     *   **Functionality**: Analyzes sentiment in counseling notes and surveys.
+    *   **Tools**:
+        *   `get_counseling_visits`: Retrieve counseling history.
+        *   `get_survey_responses`: Analyze student surveys.
+        *   `get_social_engagement`: Check campus involvement.
 
 5.  **Academic Support Agent** (`academic_support/agent.py`):
     *   **Role**: The academic tutor.
     *   **Functionality**: Creates study plans and **searches for real YouTube video tutorials** using the YouTube MCP Server.
+    *   **Tools**:
+        *   `get_weak_subjects`: Identify struggling areas.
+        *   `get_learning_style`: Determine preferred learning method.
+        *   `get_study_resources`: Find general study materials.
+        *   `get_video_resources` (**MCP**): Search YouTube for tutorials.
 
 6.  **Intervention Coordinator Agent** (`intervention/agent.py`):
     *   **Role**: The case worker.
     *   **Functionality**: Creates and saves formal intervention records.
+    *   **Tools**:
+        *   `create_intervention`: Log a new intervention in DB.
+        *   `notify_stakeholder`: Send alerts to teachers/parents.
+        *   `get_active_interventions`: Check existing plans.
 
 7.  **Family Engagement Agent** (`family/agent.py`):
     *   **Role**: The parent liaison.
     *   **Functionality**: Drafts empathetic communication for parents.
+    *   **Tools**:
+        *   `get_parent_contact_info`: Retrieve contact details.
+        *   `send_parent_message`: Draft/send messages.
+        *   `translate_message`: Translate to preferred language.
 
 8.  **Final Summary Agent** (`summary/agent.py`):
     *   **Role**: The reporter.
     *   **Functionality**: Aggregates all agent results into a comprehensive markdown report.
     *   **Database Fallback**: If the shared state is empty (e.g., after a restart), it automatically retrieves historical data from the database.
+    *   **Tools**:
+        *   `get_all_agent_results`: Retrieve data from Shared State or Database.
 
 ## 4. Setup & Installation
 
