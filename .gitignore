@@ -1,2 +1,9 @@
 .env
 */.env
+
+
+venv
+
+__pycache__
+
+school_dropout_agent.db

@@ -1,8 +1,16 @@
-from google.adk.agents.llm_agent import Agent
+"""
+Entry point for ADK web interface.
+This file is automatically loaded by `adk web` command.
+"""
+from school_dropout_agent.agents.orchestrator.agent import DropoutPreventionOrchestrator
+from school_dropout_agent.infrastructure.memory.database_memory import DatabaseMemoryService
+from school_dropout_agent.infrastructure.database.database import init_db
 
-root_agent = Agent(
-    model='gemini-2.5-flash',
-    name='root_agent',
-    description='A helpful assistant for user questions.',
-    instruction='Answer user questions to the best of your knowledge',
-)
+# Initialize database
+init_db()
+
+# Create memory service
+memory_service = DatabaseMemoryService()
+
+# Create root agent with memory service
+root_agent = DropoutPreventionOrchestrator(memory_service=memory_service)
