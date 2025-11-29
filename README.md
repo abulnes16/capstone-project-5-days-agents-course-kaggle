@@ -16,24 +16,24 @@ This project implements a sophisticated multi-agent system using the **Google Ag
 ### Architecture Diagram
 ```mermaid
 graph TD
-    User[User / System Trigger] -->|Prompt| Router[Router Agent (Orchestrator)]
+    User["User / System Trigger"] -->|Prompt| Router["Router Agent (Orchestrator)"]
     
-    Router -->|1. New Analysis| Pipeline[Full Analysis Pipeline]
-    Router -->|2. Summary Request| Summary[Final Summary Agent]
+    Router -->|1. New Analysis| Pipeline["Full Analysis Pipeline"]
+    Router -->|2. Summary Request| Summary["Final Summary Agent"]
     
     subgraph "Full Analysis Pipeline (Sequential)"
-        Pipeline --> Risk[Risk Prediction Agent]
-        Risk -->|Save| DB[(Database)]
-        Risk -->|Pass Data| Shared[Shared State Store]
+        Pipeline --> Risk["Risk Prediction Agent"]
+        Risk -->|Save| DB[("Database")]
+        Risk -->|Pass Data| Shared["Shared State Store"]
         
-        Shared --> Emo[Emotional & Behavioral Agent]
-        Shared --> Acad[Academic Support Agent]
-        Acad -->|Search Videos| YouTube[YouTube MCP Server]
+        Shared --> Emo["Emotional & Behavioral Agent"]
+        Shared --> Acad["Academic Support Agent"]
+        Acad -->|Search Videos| YouTube["YouTube MCP Server"]
         
-        Shared --> Interv[Intervention Coordinator]
+        Shared --> Interv["Intervention Coordinator"]
         Interv -->|Save| DB
         
-        Shared --> Family[Family Engagement Agent]
+        Shared --> Family["Family Engagement Agent"]
         Family -->|Pass Data| Summary
     end
     
