@@ -38,7 +38,7 @@ graph TD
     end
     
     Summary -->|Fetch Results| Shared
-    Summary -->|Fallback (If Empty)| DB
+    Summary -->|Fallback - If Empty| DB
     Summary -->|Final Report| Router
 ```
 
