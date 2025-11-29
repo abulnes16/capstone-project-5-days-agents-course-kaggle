@@ -16,68 +16,75 @@ This project implements a sophisticated multi-agent system using the **Google Ag
 ### Architecture Diagram
 ```mermaid
 graph TD
-    User[User / System Trigger] -->|Student ID| Orch[Orchestrator Agent]
-    Orch -->|1. Analyze Risk| Risk[Risk Prediction Agent]
-    Risk -->|Save Assessment| DB[(Database)]
-    Risk -->|Risk Score| Orch
+    User[User / System Trigger] -->|Prompt| Router[Router Agent (Orchestrator)]
     
-    Orch -->|2. Check Emotional State| Emo[Emotional & Behavioral Agent]
-    Emo -->|Sentiment Analysis| Orch
+    Router -->|1. New Analysis| Pipeline[Full Analysis Pipeline]
+    Router -->|2. Summary Request| Summary[Final Summary Agent]
     
-    Orch -->|If High Risk| Plan[Planning Phase]
+    subgraph "Full Analysis Pipeline (Sequential)"
+        Pipeline --> Risk[Risk Prediction Agent]
+        Risk -->|Save| DB[(Database)]
+        Risk -->|Pass Data| Shared[Shared State Store]
+        
+        Shared --> Emo[Emotional & Behavioral Agent]
+        Shared --> Acad[Academic Support Agent]
+        Acad -->|Search Videos| YouTube[YouTube MCP Server]
+        
+        Shared --> Interv[Intervention Coordinator]
+        Interv -->|Save| DB
+        
+        Shared --> Family[Family Engagement Agent]
+        Family -->|Pass Data| Summary
+    end
     
-    Plan -->|3. Create Study Plan| Acad[Academic Support Agent]
-    Plan -->|4. Create Interventions| Interv[Intervention Coordinator]
-    Interv -->|Save Interventions| DB
-    Plan -->|5. Notify Parents| Family[Family Engagement Agent]
-    
-    Orch -->|6. Summarize| Final[Final Report]
+    Summary -->|Fetch Results| Shared
+    Summary -->|Fallback (If Empty)| DB
+    Summary -->|Final Report| Router
 ```
 
 ### Agent Roles & Functionality
-The system is composed of an **Orchestrator** and six specialized **Sub-Agents**.
+The system is composed of a **Router Agent**, a **Sequential Pipeline**, and specialized **Sub-Agents**.
 
-1.  **Dropout Prevention Orchestrator** (`orchestrator/agent.py`):
-    *   **Role**: The team lead. It coordinates the entire workflow.
-    *   **Functionality**: It receives a student ID, delegates tasks to sub-agents, and synthesizes the final report. It uses a **Wrapper Pattern** to ensure each sub-agent runs in its own reliable execution context.
+1.  **Dropout Prevention Orchestrator (Router)** (`orchestrator/agent.py`):
+    *   **Role**: The intelligent router.
+    *   **Functionality**: Decides whether to trigger a full analysis or provide a summary of past results.
 
-2.  **Risk Prediction Agent** (`risk_prediction/agent.py`):
+2.  **Full Analysis Pipeline** (`orchestrator/pipeline.py`):
+    *   **Role**: The workflow manager.
+    *   **Functionality**: Executes the 6-step analysis process sequentially, ensuring data flows between agents via the Shared State.
+
+3.  **Risk Prediction Agent** (`risk_prediction/agent.py`):
     *   **Role**: The data analyst.
-    *   **Functionality**: Fetches attendance, grades, LMS activity, and financial status. It calculates a risk score (0-1) and identifies key risk factors.
-    *   **Persistence**: Automatically saves risk assessments to the database.
+    *   **Functionality**: Calculates risk scores based on grades, attendance, and financial data. Persists results to the database.
 
-3.  **Emotional & Behavioral Agent** (`emotional/agent.py`):
+4.  **Emotional & Behavioral Agent** (`emotional/agent.py`):
     *   **Role**: The school psychologist.
-    *   **Functionality**: Analyzes sentiment in counseling notes and student surveys to detect stress, disengagement, or behavioral issues.
+    *   **Functionality**: Analyzes sentiment in counseling notes and surveys.
 
-4.  **Academic Support Agent** (`academic_support/agent.py`):
+5.  **Academic Support Agent** (`academic_support/agent.py`):
     *   **Role**: The academic tutor.
-    *   **Functionality**: Creates personalized study plans based on the student's weak subjects and learning style.
+    *   **Functionality**: Creates study plans and **searches for real YouTube video tutorials** using the YouTube MCP Server.
 
-5.  **Intervention Coordinator Agent** (`intervention/agent.py`):
+6.  **Intervention Coordinator Agent** (`intervention/agent.py`):
     *   **Role**: The case worker.
-    *   **Functionality**: Generates formal intervention records (e.g., "Assign Tutoring", "Schedule Counseling") and notifies relevant stakeholders (teachers, parents).
-    *   **Persistence**: Automatically saves intervention plans to the database.
+    *   **Functionality**: Creates and saves formal intervention records.
 
-6.  **Family Engagement Agent** (`family/agent.py`):
+7.  **Family Engagement Agent** (`family/agent.py`):
     *   **Role**: The parent liaison.
-    *   **Functionality**: Drafts empathetic communication to parents/guardians to involve them in the support process.
+    *   **Functionality**: Drafts empathetic communication for parents.
 
-7.  **Monitoring Agent** (`monitoring/agent.py`):
-    *   **Role**: The progress tracker.
-    *   **Functionality**: Used for follow-up queries to check if interventions are working over time.
-
-### Mocked Systems
-To simulate a real-world environment, this project mocks connections to external university systems in the `tools.py` files:
-*   **SIS (Student Information System)**: Mocked attendance and grades.
-*   **LMS (Learning Management System)**: Mocked login activity and assignment completion.
-*   **Financial System**: Mocked tuition status and holds.
+8.  **Final Summary Agent** (`summary/agent.py`):
+    *   **Role**: The reporter.
+    *   **Functionality**: Aggregates all agent results into a comprehensive markdown report.
+    *   **Database Fallback**: If the shared state is empty (e.g., after a restart), it automatically retrieves historical data from the database.
 
 ## 4. Setup & Installation
 
 ### Prerequisites
 *   Python 3.10 or higher
-*   A Google Cloud Project with Vertex AI API enabled OR a Google AI Studio API Key.
+*   Node.js & npm (for MCP Server)
+*   Google Cloud Project (Vertex AI) or Google AI Studio API Key
+*   YouTube Data API v3 Key
 
 ### Installation
 1.  **Clone the repository**:
@@ -89,7 +96,7 @@ To simulate a real-world environment, this project mocks connections to external
 2.  **Create a virtual environment**:
     ```bash
     python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    source venv/bin/activate
     ```
 
 3.  **Install dependencies**:
@@ -98,12 +105,10 @@ To simulate a real-world environment, this project mocks connections to external
     ```
 
 4.  **Set up Environment Variables**:
-    Export your Google API Key:
+    Create a `.env` file or export variables:
     ```bash
-    export GOOGLE_API_KEY="your-api-key-here"
-    # OR for Vertex AI
-    export VERTEX_AI_PROJECT_ID="your-project-id"
-    export VERTEX_AI_LOCATION="us-central1"
+    export GOOGLE_API_KEY="your-google-api-key"
+    export YOUTUBE_API_KEY="your-youtube-api-key"
     ```
 
 ### Running the System
@@ -111,31 +116,24 @@ To verify the full end-to-end workflow, run the verification script:
 ```bash
 python verify_orchestrator.py
 ```
-This script will:
-1.  Initialize a local SQLite database.
-2.  Seed a mock student profile ("risk_case_1").
-3.  Run the Orchestrator to analyze the student.
-4.  Verify that risk assessments and interventions are saved to the database.
-5.  Perform a follow-up query to test memory retrieval.
+This script tests:
+1.  **Full Analysis**: Complete pipeline execution.
+2.  **Summary Request**: Routing to the summary agent.
+3.  **Database Fallback**: Retrieving history after clearing memory.
 
-## 5. Results and Testing
-The system has been verified using the `verify_orchestrator.py` script, which simulates a full end-to-end workflow.
-
-### Behavior Observed
-1.  **Risk Identification**: The system successfully identified "Student risk_case_1" as **High Risk** (Score: 0.95) due to low attendance, failing grades, and financial holds.
-2.  **Contextual Analysis**: The Emotional Agent correctly identified "High Stress" from the mocked counseling notes.
-3.  **Actionable Interventions**: The system automatically created 4 specific interventions (Academic Support, Emotional Counseling) and saved them to the database.
-4.  **Persistence**: In a follow-up session, the Orchestrator successfully retrieved the *previously saved* interventions from the database, proving that the system maintains long-term memory of the student's case.
-
-### Sample Output
-```json
-{
-  "risk_level": "High",
-  "risk_score": 0.95,
-  "summary": "Student is at critical risk. Interventions have been created and parents notified.",
-  "interventions": [
-    {"type": "Academic", "status": "Pending", "description": "Tutoring for Math 101"},
-    {"type": "Emotional", "status": "Pending", "description": "Weekly counseling sessions"}
-  ]
-}
+To verify the YouTube integration:
+```bash
+python verify_youtube_mcp.py
 ```
+
+## 5. Key Features
+
+### Shared State Management
+Agents communicate via a singleton `SharedStateStore`. This allows them to pass detailed JSON data (like full study plans) to the next agent without cluttering the main conversation history with the user.
+
+### Database Fallback
+The system is resilient to restarts. If you ask for a summary of a student analyzed in a previous session, the `FinalSummaryAgent` detects the empty shared state and seamlessly retrieves the student's history from the SQLite database.
+
+### MCP Integration (Model Context Protocol)
+The system uses the **Model Context Protocol** to connect to external tools. The `AcademicSupportAgent` connects to a **YouTube MCP Server** to find real, relevant educational videos for students, rather than hallucinating links.
+
